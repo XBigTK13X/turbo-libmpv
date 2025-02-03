@@ -1,0 +1,43 @@
+{
+  "name": "turbo-libmpv",
+  "version": "0.1.0",
+  "description": "Libmpv Turbo Native Modules wrapper",
+  "react-native": "js/index",
+  "source": "js/index",
+  "files": [
+    "js",
+    "android",
+    "ios",
+    "rtn-calculator.podspec",
+    "!android/build",
+    "!ios/build",
+    "!**/__tests__",
+    "!**/__fixtures__",
+    "!**/__mocks__"
+  ],
+  "keywords": [
+    "react-native",
+    "ios",
+    "android"
+  ],
+  "repository": "https://github.com/xbigtk13x/turbo-libmpv",
+  "author": "<XBigTK13X> <xbigtk13x@gmail.com> (https://github.com/xbigtk13x)",
+  "license": "GPL2",
+  "bugs": {
+    "url": "https://github.com/xbigtk13x/turbo-libmpv/issues"
+  },
+  "homepage": "https://github.com/xbigtk13x/turbo-libmpv#readme",
+  "devDependencies": {},
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*"
+  },
+  "codegenConfig": {
+    "name": "LibmpvSpec",
+    "type": "modules",
+    "jsSrcsDir": "js",
+    "android": {
+      "javaPackageName": "com.libmpv"
+    }
+  }
+}
