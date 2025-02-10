@@ -1,100 +1,60 @@
 package com.libmpv;
 
-import android.graphics.Color;
-import android.view.SurfaceView;
-
-import androidx.annotation.NonNull;
-
+import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.module.annotations.ReactModule;
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
-import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.uimanager.ViewManagerDelegate;
 import com.facebook.react.uimanager.annotations.ReactProp;
-import com.facebook.react.uimanager.events.RCTEventEmitter;
-import com.facebook.react.uimanager.events.RCTEventEmitter;
-import dev.jdtech.mpv.MPVLib;
+import com.facebook.react.viewmanagers.LibmpvSurfaceViewManagerInterface;
+import com.facebook.react.viewmanagers.LibmpvSurfaceViewManagerDelegate;
+
+import java.util.HashMap;
 import java.util.Map;
-import com.facebook.react.bridge.Arguments;
-import com.facebook.react.common.MapBuilder;
-import com.facebook.react.modules.core.DeviceEventManagerModule;
 
-// Available event constants
-// https://github.com/facebook/react-native/blob/main/packages/react-native/ReactAndroid/src/main/java/com/facebook/react/uimanager/UIManagerModuleConstants.java
-// An example video player using VLC
-// https://github.com/razorRun/react-native-vlc-media-player/blob/master/android/src/main/java/com/yuanzhou/vlc/vlcplayer/ReactVlcPlayerViewManager.java
-public class LibmpvSurfaceViewManager extends SimpleViewManager<SurfaceView> {
+@ReactModule(name = LibmpvSurfaceViewManager.REACT_CLASS)
+class LibmpvSurfaceViewManager extends SimpleViewManager<LibmpvSurfaceView> implements LibmpvSurfaceViewManagerInterface<ReactWebView> {
 
-    public static final String REACT_CLASS = "LibmpvSurfaceView";
+    private final LibmpvSurfaceViewManagerDelegate<LibmpvSurfaceView, LibmpvSurfaceViewManager> delegate
+            = new LibmpvSurfaceViewManagerDelegate<>(this);
 
     @Override
-    @NonNull
+    public ViewManagerDelegate<LibmpvSurfaceView> getDelegate() {
+        return delegate;
+    }
+
+    @Override
     public String getName() {
         return REACT_CLASS;
     }
 
     @Override
-    @NonNull
-    public SurfaceView createViewInstance(ThemedReactContext reactContext) {
-        return new SurfaceView(reactContext);
+    public LibmpvSurfaceView createViewInstance(ThemedReactContext context) {
+        return new ReactWebView(context);
     }
 
-    @ReactProp(name = "playUrl")
-    public void register(SurfaceView view, String playUrl) {
-        ThemedReactContext reactContext = (ThemedReactContext) view.getContext();
-        DeviceEventManagerModule.RCTDeviceEventEmitter reactEventEmitter = reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class);
-        LibmpvWrapper.getInstance().defaultSetup(view);
-        LibmpvWrapper.getInstance().addEventObserver(new MPVLib.EventObserver() {
-            @Override
-            public void eventProperty(@NonNull String property) {
-                WritableMap event = Arguments.createMap();
-                event.putString("property", property);
-                event.putString("kind", "none");
-                reactEventEmitter.emit("libmpv", event);
-            }
+    @ReactProp(name = "sourceUrl")
+    @Override
+    public void setSourceURL(LibmpvSurfaceView view, String sourceURL) {
+        if (sourceURL == null) {
+            return;
+        }
+        view.loadUrl(sourceURL, new HashMap<>());
+    }
 
-            @Override
-            public void eventProperty(@NonNull String property, long value) {
-                WritableMap event = Arguments.createMap();
-                event.putString("property", property);
-                event.putString("kind", "long");
-                event.putString("value", "" + value);
-                reactEventEmitter.emit("libmpv", event);
-            }
+    public static final String REACT_CLASS = "LibmpvSurfaceView";
 
-            @Override
-            public void eventProperty(@NonNull String property, double value) {
-                WritableMap event = Arguments.createMap();
-                event.putString("property", property);
-                event.putString("kind", "double");
-                event.putString("value", "" + value);
-                reactEventEmitter.emit("libmpv", event);
-            }
-
-            @Override
-            public void eventProperty(@NonNull String property, boolean value) {
-                WritableMap event = Arguments.createMap();
-                event.putString("property", property);
-                event.putString("value", value ? "true" : "false");
-                event.putString("kind", "boolean");
-                reactEventEmitter.emit("libmpv", event);
-            }
-
-            @Override
-            public void eventProperty(@NonNull String property, @NonNull String value) {
-                WritableMap event = Arguments.createMap();
-                event.putString("property", property);
-                event.putString("value", value);
-                event.putString("kind", "string");
-                reactEventEmitter.emit("libmpv", event);
-            }
-
-            @Override
-            public void event(@MPVLib.Event int eventId) {
-                WritableMap event = Arguments.createMap();
-                event.putString("eventId", "" + eventId);
-                event.putString("kind", "eventId");
-                reactEventEmitter.emit("libmpv", event);
+    @Override
+    public Map<String, Object> getExportedCustomBubblingEventTypeConstants() {
+        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> bubblingMap = new HashMap<>();
+        bubblingMap.put("phasedRegistrationNames", new HashMap<String, String>() {
+            {
+                put("bubbled", "onScriptLoaded");
+                put("captured", "onScriptLoadedCapture");
             }
         });
-        LibmpvWrapper.getInstance().play(playUrl);
+        map.put("onScriptLoaded", bubblingMap);
+        return map;
     }
 }

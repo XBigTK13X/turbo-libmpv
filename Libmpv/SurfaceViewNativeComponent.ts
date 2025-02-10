@@ -8,9 +8,9 @@ type SurfaceViewUrlLoadedEvent = {
 
 export interface NativeProps extends ViewProps {
     videoUrl?: string;
-    onScriptLoaded?: BubblingEventHandler<SurfaceViewUrlLoadedEvent> | null;
+    onUrlLoaded?: BubblingEventHandler<SurfaceViewUrlLoadedEvent> | null;
 }
 
 export default codegenNativeComponent<NativeProps>(
-    'SurfaceView',
+    'LibmpvSurfaceView',
 ) as HostComponent<NativeProps>;
